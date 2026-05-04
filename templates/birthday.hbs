@@ -1,0 +1,161 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Happy Birthday — {{name}}</title>
+    <style>
+      body,
+      table,
+      td,
+      a {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+      table,
+      td {
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+      }
+      img {
+        -ms-interpolation-mode: bicubic;
+        border: 0;
+        outline: none;
+        text-decoration: none;
+      }
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background-color: #f0f0f0;
+      }
+      .wrapper {
+        width: 100%;
+        background-color: #f0f0f0;
+      }
+      .container {
+        max-width: 560px;
+        margin: 0 auto;
+      }
+
+      @media only screen and (max-width: 600px) {
+        .container {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        .header-pad {
+          padding: 32px 24px !important;
+        }
+        .inner-pad {
+          padding: 28px 24px 20px !important;
+        }
+        .signoff-pad {
+          padding: 0 24px 28px !important;
+        }
+        .big-title {
+          font-size: 30px !important;
+        }
+        .body-size {
+          font-size: 14px !important;
+        }
+        .label-size {
+          font-size: 10px !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <table
+        class="container"
+        cellpadding="0"
+        cellspacing="0"
+        border="0"
+        align="center"
+        style="max-width:560px;margin:32px auto;border-radius:12px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.12);"
+      >
+
+        <!-- DARK HEADER -->
+        <tr>
+          <td
+            class="header-pad"
+            align="center"
+            style="background-color:#1a1a1a;padding:44px 40px;"
+          >
+            <p
+              class="label-size"
+              style="margin:0 0 6px;font-size:11px;letter-spacing:3px;
+            color:#888888;text-transform:uppercase;font-family:Arial,sans-serif;"
+            >
+              It's your
+            </p>
+            <p
+              class="big-title"
+              style="margin:0;font-size:38px;font-weight:800;
+            color:#ffffff;letter-spacing:-1px;font-family:Arial,sans-serif;"
+            >
+              Big Day
+            </p>
+            <div
+              style="width:40px;height:2px;background-color:#F47B4F;margin:18px auto 0;"
+            ></div>
+          </td>
+        </tr>
+
+        <!-- BODY -->
+        <tr>
+          <td
+            class="inner-pad"
+            style="background-color:#ffffff;padding:36px 40px 24px;"
+          >
+            <p
+              style="margin:0 0 6px;font-size:11px;letter-spacing:1.5px;color:#aaaaaa;
+            text-transform:uppercase;font-family:Arial,sans-serif;"
+            >
+              Dear
+              {{name}},
+            </p>
+            <p
+              class="body-size"
+              style="margin:14px 0 18px;font-size:16px;color:#222222;
+            line-height:1.75;font-family:Arial,sans-serif;"
+            >
+              Happy birthday! Today we celebrate you — your energy, your
+              contributions, and everything you bring to
+              <strong>{{company}}</strong>. We're genuinely glad to have you on
+              the team.
+            </p>
+            <p
+              class="body-size"
+              style="margin:0;font-size:15px;color:#333333;
+            line-height:1.75;font-family:Arial,sans-serif;"
+            >
+              Make today count. You've earned it.
+            </p>
+          </td>
+        </tr>
+
+        <!-- DIVIDER + SIGN OFF -->
+        <tr>
+          <td style="background-color:#ffffff;padding:0 40px;">
+            <div style="height:1px;background-color:#f0f0f0;"></div>
+          </td>
+        </tr>
+        <tr>
+          <td
+            class="signoff-pad"
+            style="background-color:#ffffff;padding:0 40px 36px;"
+          >
+            <p
+              style="margin:18px 0 0;font-size:13px;color:#aaaaaa;
+            font-family:Arial,sans-serif;line-height:1.6;"
+            >
+              — HR Team,
+              <strong style="color:#333333;">{{company}}</strong>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </div>
+  </body>
+</html>
