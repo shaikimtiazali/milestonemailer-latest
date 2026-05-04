@@ -4,7 +4,12 @@
   "description": "This project is to send automated emails to employees in organization on there birthdays and work anniversaries, as a token of recognization.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "npm ci --only=production"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
   },
   "author": "SHAIK IMTIAZ ALI",
   "license": "ISC",
