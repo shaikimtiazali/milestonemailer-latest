@@ -30,7 +30,9 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: `http://localhost:${PORT}`,
+        url: process.env.BASE_URL || `http://localhost:${PORT}`,
+        description:
+          process.env.NODE_ENV === "production" ? "Production" : "Development",
       },
     ],
   },
@@ -44,7 +46,17 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 // app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors("*"));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://milestonemailer-latest.onrender.com", // your Render URL
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
+);
 app.use(helmet());
 app.use(compression());
 app.use("/employee", employeeRoutes);
