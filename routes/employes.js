@@ -76,6 +76,7 @@ router.get("/upcoming-events", async (req, res) => {
           birthMonth: d.month,
         })),
       })
+      .sort({ birthDay: 1 })
       .toArray();
     //Anniversaries
     const anniversaries = await db
@@ -90,6 +91,7 @@ router.get("/upcoming-events", async (req, res) => {
           },
         })),
       })
+      .sort({ joiningDate: 1 })
       .toArray();
 
     // Add years
