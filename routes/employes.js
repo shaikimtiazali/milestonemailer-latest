@@ -1,6 +1,6 @@
 const express = require("express");
 const connectDB = require("../database/mongo");
-const { getNext7Days } = require("../utils/helper");
+const { getNext7Days, calculateYears } = require("../utils/helper");
 const logger = require("../utils/logger");
 const emailQueue = require("../queue/emailQueue");
 const router = express.Router();
@@ -198,6 +198,8 @@ router.post("/add-employee", async (req, res) => {
     // Convert joiningDate from MongoDB extended JSON to JS Date
     if (body.joiningDate?.$date) {
       body.joiningDate = new Date(body.joiningDate.$date);
+    } else if (body.joiningDate) {
+      body.joiningDate = new Date(body.joiningDate);
     }
 
     const employee = {
@@ -222,79 +224,97 @@ router.post("/add-employee", async (req, res) => {
 /**
  * @swagger
  * /employee/test-birthday:
- *   get:
+ *   post:
  *     summary: Test birthday email job
  *     tags: [Employee]
- *     description: Adds a birthday email job to the queue.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [employee]
+ *             properties:
+ *               employee:
+ *                 type: object
+ *                 required: [name, email, birthDay, birthMonth]
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *                   birthDay:
+ *                     type: integer
+ *                   birthMonth:
+ *                     type: integer
+ *           example:
+ *             employee:
+ *               name: "Imtiaz Ali"
+ *               email: "imtiazali.ali36@gmail.com"
+ *               birthDay: 8
+ *               birthMonth: 4
  *     responses:
  *       200:
  *         description: Birthday job added.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                   id:
- *                     type: integer
- *                   name:
- *                     type: string
  */
 
-router.get("/test-birthday", async (req, res) => {
-  await emailQueue.add("birthday", {
-    employee: {
-      name: "Imtiaz Ali",
-      email: "imtiazali.ali36@gmail.com",
-      birthDay: 8,
-      birthMonth: 4,
-      joiningDate: "2023-04-08",
-    },
-    allEmails: [
-      "imtiazali.ali36@gmail.com",
-      "shaikimtiazali6@gmail.com",
-      "imtiazalis@aapmor.com",
-    ],
-  });
-
+router.post("/test-birthday", async (req, res) => {
+  const { employee } = req.body;
+  await emailQueue.add("birthday", { employee });
   res.json({ success: true, message: "Birthday job added" });
 });
 
 /**
  * @swagger
  * /employee/test-anniversary:
- *   get:
+ *   post:
  *     summary: Test anniversary email job
  *     tags: [Employee]
- *     description: Adds an anniversary email job to the queue.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [employee, allEmails]
+ *             properties:
+ *               employee:
+ *                 type: object
+ *                 required: [name, email, joiningDate]
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *                   joiningDate:
+ *                     type: string
+ *                     format: date
+ *               allEmails:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *           example:
+ *             employee:
+ *               name: "Imtiaz Ali"
+ *               email: "imtiazali.ali36@gmail.com"
+ *               joiningDate: "2023-05-04"
+ *             allEmails:
+ *               - "shaikimtiazali6@gmail.com"
+ *               - "imtiazalis@aapmor.com"
  *     responses:
  *       200:
  *         description: Anniversary job added.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                   id:
- *                     type: integer
- *                   name:
- *                     type: string
  */
 
-router.get("/test-anniversary", async (req, res) => {
-  await emailQueue.add("anniversary", {
-    employee: {
-      name: "Imtiaz Ali",
-      email: "imtiazali.ali36@gmail.com",
-      joiningDate: "2023-05-04",
-    },
-    years: 3,
-    allEmails: [
-      "shaikimtiazali6@gmail.com",
-      "imtiazalis@aapmor.com",
-      process.env.MANAGER_EMAIL,
-    ],
-  });
+router.post("/test-anniversary", async (req, res) => {
+  const { employee, allEmails } = req.body;
+  const years = calculateYears(employee.joiningDate);
+  await emailQueue.add("anniversary", { employee, years, allEmails });
 
-  res.json({ success: true, message: "Anniversary job added" });
+  res.json({
+    success: true,
+    message: "Anniversary job added",
+    years,
+  });
 });
 module.exports = router;

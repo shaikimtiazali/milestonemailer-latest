@@ -1,5 +1,4 @@
-// scripts/cleanQueue.js
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 const { Queue } = require("bullmq");
 
 const connection = require("../queue/connection");
@@ -7,22 +6,43 @@ const connection = require("../queue/connection");
 async function cleanQueue() {
   const queue = new Queue("emailQueue", { connection });
 
-  // See all repeatable jobs currently in Redis
-  const repeatableJobs = await queue.getRepeatableJobs();
-  console.log("Current repeatable jobs:", repeatableJobs);
+  console.log("Cleaning BullMQ Queue...\n");
 
-  // Remove all repeatable jobs
+  // 1. Remove repeatable jobs
+  const repeatableJobs = await queue.getRepeatableJobs();
+  console.log(`Found ${repeatableJobs.length} repeatable jobs`);
+
   for (const job of repeatableJobs) {
     await queue.removeRepeatableByKey(job.key);
-    console.log(`Removed job: ${job.key}`);
+    console.log(`Removed repeatable job: ${job.key}`);
   }
 
-  console.log("Done. All old repeatable jobs cleared.");
+  // 2. Clean all job states
+  console.log("Cleaning job states...");
+
+  await queue.drain(true); // removes waiting + delayed
+  console.log("Waiting & delayed jobs cleared");
+
+  await queue.clean(0, 1000, "active");
+  console.log("Active jobs cleared");
+
+  await queue.clean(0, 1000, "completed");
+  console.log("Completed jobs cleared");
+
+  await queue.clean(0, 1000, "failed");
+  console.log("Failed jobs cleared");
+
+  // Optional: paused jobs
+  await queue.clean(0, 1000, "paused");
+  console.log("Paused jobs cleared");
+
+  console.log("Queue cleanup completed successfully!");
+
   await queue.close();
   process.exit(0);
 }
 
 cleanQueue().catch((err) => {
-  console.error(err);
+  console.error("Cleanup failed:", err);
   process.exit(1);
 });

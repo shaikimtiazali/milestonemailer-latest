@@ -7,6 +7,7 @@ const employeeRoutes = require("./routes/employes");
 // const morgan = require("morgan");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+const basicAuth = require("express-basic-auth");
 const { serverAdapter } = require("./queue/board");
 const logger = require("./utils/logger");
 const emailQueue = require("./queue/emailQueue");
@@ -25,7 +26,7 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Milestone Mailer API with Swagger",
+      title: "Milestone Mailer API",
       version: "1.0.0",
       description: "Api's for Milestone Mailer",
     },
@@ -63,11 +64,15 @@ app.use(helmet());
 app.use(compression());
 app.use("/employee", employeeRoutes);
 app.use("/admin/queues", serverAdapter.getRouter());
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-app.get("/", (req, res) => {
-  res.send("Welcome to the Milestone Mailer API");
-});
+app.use(
+  "/",
+  swaggerUi.serve,
+  basicAuth({
+    users: { admin: "supersecret" },
+    challenge: true, // Shows the browser's login popup
+  }),
+  swaggerUi.setup(swaggerSpec),
+);
 
 // Worker
 const worker = new Worker(
