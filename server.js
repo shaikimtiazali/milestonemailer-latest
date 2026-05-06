@@ -4,7 +4,6 @@ const cors = require("cors");
 const helmet = require("helmet");
 const compression = require("compression");
 const employeeRoutes = require("./routes/employes");
-// const morgan = require("morgan");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const basicAuth = require("express-basic-auth");
@@ -46,7 +45,6 @@ const swaggerOptions = {
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 //Middleware
-// app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -68,7 +66,7 @@ app.use(
   "/",
   swaggerUi.serve,
   basicAuth({
-    users: { admin: "supersecret" },
+    users: { admin: "admin" },
     challenge: true, // Shows the browser's login popup
   }),
   swaggerUi.setup(swaggerSpec),
@@ -90,8 +88,8 @@ const worker = new Worker(
   },
   {
     connection,
-    lockDuration: 300000,
-    lockRenewTime: 150000,
+    // lockDuration: 300000,
+    // lockRenewTime: 150000,
     concurrency: parseInt(process.env.QUEUE_CONCURRENCY || "5"),
   },
 );

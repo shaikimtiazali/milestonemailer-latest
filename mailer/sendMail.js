@@ -8,8 +8,9 @@ async function sendMail(data, type) {
   const user = data?.employee;
 
   if (!user || !user.email) {
-    logger.error("Missing employee email", { data });
-    return;
+    throw new Error(
+      `Missing employee email in job data: ${JSON.stringify(data)}`,
+    );
   }
 
   const to = [user.email];
@@ -42,8 +43,7 @@ async function sendMail(data, type) {
     const years = data.years;
 
     if (!years || years <= 0) {
-      logger.warn("Invalid anniversary years", { user: user.email });
-      return;
+      throw new Error(`Invalid anniversary years (${years}) for ${user.email}`);
     }
 
     const yearLabel = years > 1 ? "Years" : "Year";

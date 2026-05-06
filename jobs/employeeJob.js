@@ -27,20 +27,29 @@ async function runEmployeeJob() {
       join.getDate() === today.getDate() &&
       join.getMonth() === today.getMonth();
 
+    // Lean payload — only what sendMail needs
+    const employeePayload = {
+      name: emp.name,
+      email: emp.email,
+      birthDay: emp.birthDay,
+      birthMonth: emp.birthMonth,
+      joiningDate: emp.joiningDate,
+    };
+
     if (isBirthday) {
       await emailQueue.add(
         "birthday",
-        { employee: emp },
+        { employee: employeePayload },
         { jobId: `b-${emp.email}-${today.toDateString()}` },
       );
     }
 
     if (isAnniversary) {
       const years = today.getFullYear() - join.getFullYear();
-      if (!years || years > 0) {
+      if (years > 0) {
         await emailQueue.add(
           "anniversary",
-          { employee: emp, years, allEmails },
+          { employee: employeePayload, years, allEmails },
           { jobId: `a-${emp.email}-${today.toDateString()}` },
         );
       }
