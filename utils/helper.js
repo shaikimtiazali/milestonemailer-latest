@@ -7,8 +7,8 @@ dns.setDefaultResultOrder("ipv4first");
 const logger = require("./logger");
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 587,
+  host: "smtp.office365.com",
+  port: 587,
   secure: false,
   family: 4,
   auth: {
