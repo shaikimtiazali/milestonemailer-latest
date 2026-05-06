@@ -2,6 +2,8 @@ require("dotenv").config({
   quiet: true,
 });
 const nodemailer = require("nodemailer");
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
 const logger = require("./logger");
 
 const transporter = nodemailer.createTransport({
@@ -16,6 +18,9 @@ const transporter = nodemailer.createTransport({
   pool: true,
   maxConnections: 5,
   maxMessages: 100,
+  tls: {
+    servername: "smtp.office365.com",
+  },
 });
 
 // Verify SMTP once
