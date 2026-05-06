@@ -10,6 +10,7 @@ const router = express.Router();
  * /employee/all:
  *   get:
  *     summary: Retrieve a list of employees
+ *     tags: [Employee]
  *     description: Returns an array of employee objects.
  *     responses:
  *       200:
@@ -34,10 +35,14 @@ router.get("/all", async (req, res) => {
       .collection(process.env.COLLECTION_NAME)
       .find({})
       .toArray();
-    res.json(employees);
+    res.json({
+      success: true,
+      totalEmployees: employees.length,
+      data: { employees },
+    });
   } catch (error) {
     logger.error("Error fetching employees:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
@@ -46,6 +51,7 @@ router.get("/all", async (req, res) => {
  * /employee/upcoming-events:
  *   get:
  *     summary: Retrieve upcoming events for employees
+ *     tags: [Employee]
  *     description: Returns a list of upcoming birthdays and anniversaries.
  *     responses:
  *       200:
@@ -101,6 +107,7 @@ router.get("/upcoming-events", async (req, res) => {
     }));
     res.json({
       success: true,
+      totalEvents: birthdays.length + anniversariesWithYears.length,
       data: {
         birthdays,
         anniversaries: anniversariesWithYears,
@@ -108,7 +115,7 @@ router.get("/upcoming-events", async (req, res) => {
     });
   } catch (error) {
     logger.error("Error fetching upcoming events:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
@@ -117,38 +124,84 @@ router.get("/upcoming-events", async (req, res) => {
  * /employee/add-employee:
  *   post:
  *     summary: Add a new employee
- *     description: Creates a new employee record.
+ *     tags: [Employee]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - name
+ *               - employeeno
+ *               - employeeid
+ *               - email
+ *               - birthDay
+ *               - birthMonth
+ *               - joiningDate
  *             properties:
  *               name:
  *                 type: string
+ *                 example: "Shaik Imtiaz Ali"
+ *               employeeno:
+ *                 type: string
+ *                 example: "TEST100"
+ *               employeeid:
+ *                 type: integer
+ *                 example: 999
  *               email:
  *                 type: string
+ *                 example: "imtiazali.ali36@gmail.com"
+ *               birthDay:
+ *                 type: integer
+ *                 example: 5
+ *               birthMonth:
+ *                 type: integer
+ *                 example: 5
+ *               joiningDate:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2022-05-04T00:00:00.000Z"
+ *           examples:
+ *             SampleEmployee:
+ *               summary: Sample employee payload
+ *               value:
+ *                 name: "Shaik Imtiaz Ali"
+ *                 employeeno: "TEST100"
+ *                 employeeid: 999
+ *                 email: "imtiazali.ali36@gmail.com"
+ *                 birthDay: 5
+ *                 birthMonth: 5
+ *                 joiningDate: "2022-05-04T00:00:00.000Z"
  *     responses:
  *       201:
- *         description: Employee added successfully.
+ *         description: Employee added successfully
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
  *                 message:
  *                   type: string
- *                   name:
- *                     type: string
+ *                   example: "Employee added successfully"
  */
 
-router.post("/employee", async (req, res) => {
+router.post("/add-employee", async (req, res) => {
   try {
     const db = await connectDB();
 
+    const body = { ...req.body };
+
+    // Convert joiningDate from MongoDB extended JSON to JS Date
+    if (body.joiningDate?.$date) {
+      body.joiningDate = new Date(body.joiningDate.$date);
+    }
+
     const employee = {
-      ...req.body,
+      ...body,
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -157,11 +210,12 @@ router.post("/employee", async (req, res) => {
     await db.collection(process.env.COLLECTION_NAME).insertOne(employee);
 
     res.status(201).json({
+      success: true,
       message: "Employee added successfully",
     });
   } catch (error) {
     logger.error("Error adding employee:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 });
 
@@ -170,6 +224,7 @@ router.post("/employee", async (req, res) => {
  * /employee/test-birthday:
  *   get:
  *     summary: Test birthday email job
+ *     tags: [Employee]
  *     description: Adds a birthday email job to the queue.
  *     responses:
  *       200:
@@ -201,7 +256,7 @@ router.get("/test-birthday", async (req, res) => {
     ],
   });
 
-  res.send("Birthday job added");
+  res.json({ success: true, message: "Birthday job added" });
 });
 
 /**
@@ -209,6 +264,7 @@ router.get("/test-birthday", async (req, res) => {
  * /employee/test-anniversary:
  *   get:
  *     summary: Test anniversary email job
+ *     tags: [Employee]
  *     description: Adds an anniversary email job to the queue.
  *     responses:
  *       200:
@@ -239,6 +295,6 @@ router.get("/test-anniversary", async (req, res) => {
     ],
   });
 
-  res.send("Anniversary job added");
+  res.json({ success: true, message: "Anniversary job added" });
 });
 module.exports = router;
