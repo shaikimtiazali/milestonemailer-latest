@@ -19,6 +19,7 @@ dotenv.config({ quiet: true });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 
 const swaggerOptions = {
   definition: {
@@ -30,7 +31,8 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: process.env.BASE_URL || `http://localhost:${PORT}`,
+        url: BASE_URL,
+        // url: process.env.BASE_URL || `http://localhost:${PORT}`,
         description:
           process.env.NODE_ENV === "production" ? "Production" : "Development",
       },
@@ -124,14 +126,20 @@ async function startScheduler() {
   logger.info("Scheduler Started", { cron: CRON });
 }
 
+async function getScheduledJobs(queue) {
+  const repeatable = await queue.getRepeatableJobs();
+  logger.info("Repeatable Jobs:", repeatable);
+}
+
 (async () => {
   try {
     await startScheduler();
+    await getScheduledJobs(emailQueue);
 
     app.listen(PORT, () => {
-      logger.info(`Server is running on port http://localhost:${PORT}`);
+      logger.info(`Server is running on port ${BASE_URL}`);
       logger.info(
-        `BullMQ Dashboard is running on port http://localhost:${PORT}/admin/queues`,
+        `BullMQ Dashboard is running on port ${BASE_URL}/admin/queues`,
       );
     });
   } catch (err) {
