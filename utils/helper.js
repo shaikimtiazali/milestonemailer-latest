@@ -8,6 +8,7 @@ const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT) || 587,
   secure: false,
+  family: 4,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -44,7 +45,26 @@ function getNext7Days() {
   return dates;
 }
 
+const calculateYears = (joiningDate) => {
+  const joinDate = new Date(joiningDate);
+  const today = new Date();
+
+  let years = today.getFullYear() - joinDate.getFullYear();
+
+  const hasNotCompletedYear =
+    today.getMonth() < joinDate.getMonth() ||
+    (today.getMonth() === joinDate.getMonth() &&
+      today.getDate() < joinDate.getDate());
+
+  if (hasNotCompletedYear) {
+    years--;
+  }
+
+  return years;
+};
+
 module.exports = {
   getNext7Days,
   transporter,
+  calculateYears,
 };
