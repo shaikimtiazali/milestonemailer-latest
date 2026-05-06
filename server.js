@@ -106,13 +106,18 @@ worker.on("failed", async (job, err) => {
 // Scheduler
 async function startScheduler() {
   const CRON = "0 9 * * *"; // Every day at 9:00 AM
+  const existingJob = await emailQueue.getJob("process-employees");
+  if (existingJob) {
+    logger.info("Existing scheduler job found, skipping creation");
+    return;
+  }
 
   await emailQueue.add(
     "process-employees",
     {},
     {
-      repeat: { pattern: CRON },
       jobId: "process-employees",
+      repeat: { cron: CRON, tz: "Asia/Kolkata" },
     },
   );
 
