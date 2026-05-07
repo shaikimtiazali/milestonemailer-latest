@@ -31,8 +31,8 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: BASE_URL,
-        // url: process.env.BASE_URL || `http://localhost:${PORT}`,
+        // url: BASE_URL,
+        url: process.env.BASE_URL || `http://localhost:${PORT}`,
         description:
           process.env.NODE_ENV === "production" ? "Production" : "Development",
       },
@@ -51,7 +51,8 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://milestonemailer-latest.onrender.com", // your Render URL
+      "https://milestonemailer.azurewebsites.net",
+      "https://milestonemailer-latest.onrender.com",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -63,14 +64,18 @@ app.use(compression());
 app.use("/employee", employeeRoutes);
 app.use("/admin/queues", serverAdapter.getRouter());
 app.use(
-  "/",
+  "/api-docs",
   swaggerUi.serve,
   basicAuth({
     users: { admin: "admin" },
-    challenge: true, // Shows the browser's login popup
+    challenge: true,
   }),
   swaggerUi.setup(swaggerSpec),
 );
+
+app.get("/", (req, res) => {
+  res.send("Welcome to Milestone Mailer API");
+});
 
 // Worker
 const worker = new Worker(
