@@ -65,11 +65,11 @@ app.use("/employee", employeeRoutes);
 app.use("/admin/queues", serverAdapter.getRouter());
 app.use(
   "/api-docs",
-  swaggerUi.serve,
   basicAuth({
     users: { admin: "admin" },
     challenge: true,
   }),
+  swaggerUi.serve,
   swaggerUi.setup(swaggerSpec),
 );
 
