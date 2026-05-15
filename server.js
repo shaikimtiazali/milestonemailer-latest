@@ -115,7 +115,7 @@ worker.on("failed", async (job, err) => {
 
 // Scheduler
 async function startScheduler() {
-  const CRON = "* * * * *"; // Every day at 9:00 AM
+  const CRON = "0 9 * * *"; // Every day at 9:00 AM
 
   await emailQueue.upsertJobScheduler(
     "process-employees",
