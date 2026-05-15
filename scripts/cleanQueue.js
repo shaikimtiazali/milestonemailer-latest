@@ -1,48 +1,53 @@
 require("dotenv").config({ quiet: true });
 const { Queue } = require("bullmq");
-
 const connection = require("../queue/connection");
+const logger = require("../utils/logger");
 
 async function cleanQueue() {
   const queue = new Queue("emailQueue", { connection });
 
-  console.log("Cleaning BullMQ Queue...\n");
+  logger.info("=== BullMQ Queue Cleanup Started ===");
 
-  // 1. Remove repeatable jobs
-  const repeatableJobs = await queue.getRepeatableJobs();
-  console.log(`Found ${repeatableJobs.length} repeatable jobs`);
+  // 1. Remove job schedulers (replaces deprecated getRepeatableJobs)
+  try {
+    const schedulers = await queue.getJobSchedulers();
+    logger.info(`Found ${schedulers.length} job scheduler(s)`);
 
-  for (const job of repeatableJobs) {
-    await queue.removeRepeatableByKey(job.key);
-    console.log(`Removed repeatable job: ${job.key}`);
+    for (const scheduler of schedulers) {
+      await queue.removeJobScheduler(scheduler.key);
+      logger.info("Removed job scheduler", {
+        key: scheduler.key,
+        name: scheduler.name,
+      });
+    }
+  } catch (err) {
+    logger.error("Failed to remove job schedulers", { error: err.message });
+    throw err;
   }
 
   // 2. Clean all job states
-  console.log("Cleaning job states...");
+  const cleanSteps = [
+    { label: "waiting & delayed", fn: () => queue.drain(true) },
+    { label: "active", fn: () => queue.clean(0, 1000, "active") },
+    { label: "completed", fn: () => queue.clean(0, 1000, "completed") },
+    { label: "failed", fn: () => queue.clean(0, 1000, "failed") },
+    { label: "paused", fn: () => queue.clean(0, 1000, "paused") },
+  ];
 
-  await queue.drain(true); // removes waiting + delayed
-  console.log("Waiting & delayed jobs cleared");
+  for (const step of cleanSteps) {
+    try {
+      await step.fn();
+      logger.info(`Cleared ${step.label} jobs`);
+    } catch (err) {
+      logger.error(`Failed to clear ${step.label} jobs`, {
+        error: err.message,
+      });
+      throw err;
+    }
+  }
 
-  await queue.clean(0, 1000, "active");
-  console.log("Active jobs cleared");
-
-  await queue.clean(0, 1000, "completed");
-  console.log("Completed jobs cleared");
-
-  await queue.clean(0, 1000, "failed");
-  console.log("Failed jobs cleared");
-
-  // Optional: paused jobs
-  await queue.clean(0, 1000, "paused");
-  console.log("Paused jobs cleared");
-
-  console.log("Queue cleanup completed successfully!");
-
+  logger.info("=== Queue Cleanup Completed Successfully ===");
   await queue.close();
-  process.exit(0);
 }
 
-cleanQueue().catch((err) => {
-  console.error("Cleanup failed:", err);
-  process.exit(1);
-});
+module.exports = cleanQueue;

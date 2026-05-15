@@ -15,6 +15,7 @@ const { Worker } = require("bullmq");
 const runEmployeeJob = require("./jobs/employeeJob");
 const sendMail = require("./mailer/sendMail");
 const alertFailure = require("./mailer/alertFailure");
+const cleanQueue = require("./scripts/cleanQueue");
 dotenv.config({ quiet: true });
 
 const app = express();
@@ -49,10 +50,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: [
+    origin: process.env.ALLOWED_ORIGINS?.split(",") || [
       "http://localhost:3000",
       "https://milestonemailer.azurewebsites.net",
-      "https://milestonemailer-latest.onrender.com",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -115,23 +115,23 @@ worker.on("failed", async (job, err) => {
 
 // Scheduler
 async function startScheduler() {
-  const CRON = "0 9 * * *"; // Every day at 9:00 AM
-  const existingJob = await emailQueue.getJob("process-employees");
-  if (existingJob) {
-    logger.info("Existing scheduler job found, skipping creation");
-    return;
-  }
+  const CRON = "* * * * *"; // Every day at 9:00 AM
 
-  await emailQueue.add(
+  await emailQueue.upsertJobScheduler(
     "process-employees",
-    {},
     {
-      jobId: "process-employees",
-      repeat: { cron: CRON, tz: "Asia/Kolkata" },
+      pattern: CRON,
+      tz: "Asia/Kolkata",
+    },
+    {
+      opts: {
+        removeOnComplete: { count: 10 },
+        removeOnFail: { count: 20 },
+      },
     },
   );
 
-  logger.info("Scheduler Started", { cron: CRON });
+  logger.info("Scheduler registered", { cron: CRON });
 }
 
 async function getScheduledJobs(queue) {
@@ -141,6 +141,7 @@ async function getScheduledJobs(queue) {
 
 (async () => {
   try {
+    await cleanQueue();
     await startScheduler();
     await getScheduledJobs(emailQueue);
 
