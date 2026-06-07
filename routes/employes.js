@@ -195,13 +195,6 @@ router.post("/add-employee", async (req, res) => {
 
     const body = { ...req.body };
 
-    // Convert joiningDate from MongoDB extended JSON to JS Date
-    // if (body.joiningDate?.$date) {
-    //   body.joiningDate = new Date(body.joiningDate.$date);
-    // } else if (body.joiningDate) {
-    //   body.joiningDate = new Date(body.joiningDate);
-    // }
-
     if (body.joiningDate?.$date) {
       body.joiningDate = new Date(body.joiningDate.$date);
     } else if (body.joiningDate) {

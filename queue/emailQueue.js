@@ -1,8 +1,8 @@
-require("dotenv").config({
-  quiet: true,
-});
+// require("dotenv").config({
+//   quiet: true,
+// });
 const { Queue } = require("bullmq");
-const IORedis = require("ioredis");
+// const IORedis = require("ioredis");
 const logger = require("../utils/logger");
 
 const connection = require("./connection");

@@ -1,4 +1,4 @@
-const nodemailer = require("nodemailer");
+// const nodemailer = require("nodemailer");
 const { transporter } = require("../utils/helper");
 const logger = require("../utils/logger");
 

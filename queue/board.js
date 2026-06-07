@@ -14,5 +14,5 @@ const { addQueue } = createBullBoard({
 
 module.exports = {
   serverAdapter,
-  addQueue,
+  // addQueue,
 };

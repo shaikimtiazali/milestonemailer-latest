@@ -1,6 +1,6 @@
-require("dotenv").config({
-  quiet: true,
-});
+// require("dotenv").config({
+//   quiet: true,
+// });
 const IORedis = require("ioredis");
 const logger = require("../utils/logger");
 
