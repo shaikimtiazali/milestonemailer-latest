@@ -25,27 +25,6 @@ async function cleanQueue() {
     throw err;
   }
 
-  // 2. Clean all job states
-  const cleanSteps = [
-    { label: "waiting & delayed", fn: () => queue.drain(true) },
-    { label: "active", fn: () => queue.clean(0, 1000, "active") },
-    { label: "completed", fn: () => queue.clean(0, 1000, "completed") },
-    { label: "failed", fn: () => queue.clean(0, 1000, "failed") },
-    { label: "paused", fn: () => queue.clean(0, 1000, "paused") },
-  ];
-
-  for (const step of cleanSteps) {
-    try {
-      await step.fn();
-      logger.info(`Cleared ${step.label} jobs`);
-    } catch (err) {
-      logger.error(`Failed to clear ${step.label} jobs`, {
-        error: err.message,
-      });
-      throw err;
-    }
-  }
-
   logger.info("=== Queue Cleanup Completed Successfully ===");
   await queue.close();
 }
