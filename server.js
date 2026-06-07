@@ -64,7 +64,7 @@ app.use(compression());
 app.use("/employee", employeeRoutes);
 app.use("/admin/queues", serverAdapter.getRouter());
 app.use(
-  "/api-docs",
+  "/",
   basicAuth({
     users: { admin: "admin" },
     challenge: true,
@@ -73,9 +73,9 @@ app.use(
   swaggerUi.setup(swaggerSpec),
 );
 
-app.get("/", (req, res) => {
-  res.send("Welcome to Milestone Mailer API");
-});
+// app.get("/", (req, res) => {
+//   res.send("Welcome to Milestone Mailer API");
+// });
 
 // Worker
 const worker = new Worker(
