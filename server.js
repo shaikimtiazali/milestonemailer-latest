@@ -28,7 +28,8 @@ const swaggerOptions = {
     info: {
       title: "Milestone Mailer API",
       version: "1.0.0",
-      description: "Api's for Milestone Mailer",
+      description: `## Monitoring
+- BullMQ Dashboard: <a href="${BASE_URL}/admin/queues" target="_blank">${BASE_URL}/admin/queues</a>`,
     },
     servers: [
       {
@@ -72,10 +73,6 @@ app.use(
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec),
 );
-
-// app.get("/", (req, res) => {
-//   res.send("Welcome to Milestone Mailer API");
-// });
 
 // Worker
 const worker = new Worker(
